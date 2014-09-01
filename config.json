@@ -1,0 +1,37 @@
+define(PROGRAM_PATH, function( ){ return require('path').dirname(require.main.filename).replace(/\\/gi, "/") });
+{
+    "_program_path": "::PROGRAM_PATH()",
+    "repl": {
+        "local": {
+            "enable": true
+        },
+        "telnet": {
+            "enable": false,
+            "port": 3001
+        }
+    },
+	"db": {
+		"enggine": "mysql",
+		"host": "localhost",
+		"port": 3306,
+		"username": "dsmile",
+		"password": "dsmile",
+		"database": "dsmile"
+	},
+	"site": {
+		"title": "D'Smile Klinik",
+		"powered-by": "1412 @ NodeJS Express",
+		"session_secret": "dsmileklinik",
+		"serve_index": false,
+		"listen_port": 3000		
+	},
+	"application": {
+		"name": "Aplikasi Klinik D'Smile",
+		"owner": "Tintus Ardi",
+		"version": 1.0,
+		"address": "Jalan simalakama",
+		"admin_username": "superadmin",
+		"admin_password": "superadmin",
+		"admin_email": "admin@host.com"
+	}
+}

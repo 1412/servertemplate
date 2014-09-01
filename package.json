@@ -1,0 +1,39 @@
+{
+  "name": "ServerFramework",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "~4.2.0",
+    "plural": "~0.1.4",
+    "debug": "~0.7.4",
+    "jade": "~1.3.0",
+    "ejs": "~1.0.0",
+    "consolidate": "~0.10.0",
+    "express-ejs-layouts": "~1.1.0",
+    "sequelize": "~2.0.0-alpha2",
+    "mysql": "~2.3.2",
+    "config-reader": "~0.1.0",
+    "marshaljson": "~0.1.0",
+    "nodemailer": "~0.4.4",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.0",
+    "serve-static": "~1.2.3",
+    "serve-index": "~1.1.4",
+    "serve-favicon": "~2.0.1",
+    "response-time": "~2.0.0",
+    "morgan": "~1.0.0",
+    "method-override": "~2.0.1",
+    "csurf": "~1.2.2",
+    "cookie-session": "~1.0.2",
+    "compression": "~1.0.8",
+    "connect-timeout": "~1.1.1",
+    "jswget": "~0.3.3-c",
+    "chokidar": "~0.8.4"
+  },
+  "main": "index.js",
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,12 @@
+IP: 103.28.57.110
+user: yggdra
+pass: d3cky!@#
+di /home/decky ada folder dsm
+itu nglink ke http://file.tnt.my.id/dsmile/
+phpmyadmin bisa d akses d file.tnt.my.id/pma
+user: root
+pwd: rahasiamysqlx
+
+CREATE DATABASE IF NOT EXISTS dsmile
+CREATE USER 'dsmile'@'localhost' IDENTIFIED BY 'dsmile';
+GRANT CREATE, DROP, DELETE, INSERT, SELECT, UPDATE ON dsmile.* TO 'dsmile'@'localhost';
