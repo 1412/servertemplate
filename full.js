@@ -291,8 +291,15 @@ var Server = function () {
         });
         
         this.ExpressAPP._router.layer_map = {};
-        this.ExpressAPP._router.error_handler_layer_map = [];
-        
+        for (var i in this.ExpressAPP._router.stack) {
+            var name = this.ExpressAPP._router.stack[i].handle.name;
+            if (name.length == 0) {
+                name = "unamed" + Math.random().toFixed(3) * 1000;
+            }
+            name = "config:" + name;
+            this.ExpressAPP._router.layer_map[name] = i;
+        }
+        this.SetExpressErrorHandler();        
         this.DB.init({
             onbegin: function(){
                 this.AppendLog('info', 'Connecting to database...');
@@ -310,7 +317,6 @@ var Server = function () {
                 this.AppendLog('info', 'Failed to insert initial data with errors:'+'\n' + JSON.stringify(worker.error, null, 4));
             },
             onsuccess: function(){
-                this.SetExpressErrorHandler();
                 this.ExpressServer = this.ExpressAPP.listen(this.CONFIG.site.listen_port);                
                 this.AppendLog('info', 'Express app listening to port: ' + this.CONFIG.site.listen_port);
                 this.StartExpressRouteWatcher();
@@ -327,7 +333,6 @@ var Server = function () {
         this.ExpressAPP.Watcher
             .on('add', function(path) {
                 this.SetExpressRoute(path);
-                this.SetExpressErrorHandler();
             }.bind(this))
             .on('addDir', function(path) {
             }.bind(this))
@@ -335,7 +340,7 @@ var Server = function () {
                 this.SetExpressRoute(path);
             }.bind(this))
             .on('unlink', function(path) {
-                // should remove route
+                this.SetExpressRoute(path, true);
             }.bind(this))
             .on('unlinkDir', function(path) {
             }.bind(this))
@@ -343,13 +348,24 @@ var Server = function () {
                 this.AppendLog('error', 'Express Watcher Error ' + JSON.stringify(error.stack.split('\n'). null, 4));
             }.bind(this));
     }
-    this.__proto__.SetExpressRoute = function(scriptpath){
+    this.__proto__.SetExpressRoute = function(scriptpath, isremoving){
         if (scriptpath === undefined) {
             scriptpath = this.ExpressAPP._routedir;
         }
         if (this.isWindow) {
             scriptpath = scriptpath.replace(/\\/gi, '/');
-        } 
+        }
+        if (isremoving) {
+            var route = scriptpath.replace(this.ExpressAPP._routedir, '').replace(/\.js$/, '');
+            var layer_index = this.ExpressAPP._router.layer_map["route:" + route];
+            this.ExpressAPP._router.stack[layer_index].handle = function (req, res, next) {
+                var err = new Error('Not Found');
+                err.status = 404;
+                next(err);
+            };
+            this.AppendLog('info', 'Remove Route Stack \'' + route + '\'');
+            return;
+        }
         var stat = fs.lstatSync(scriptpath);
         if (stat.isDirectory()) {
             //TODO: should handle new/rename/remove route dir
@@ -374,59 +390,51 @@ var Server = function () {
                 }
                 if (routescript.__proto__ == express.Router().__proto__) {
                     isrouter = true;
-                    var layer_index = this.ExpressAPP._router.layer_map[route]
+                    var layer_index = this.ExpressAPP._router.layer_map["route:" + route];
                     var stack = this.ExpressAPP._router.stack[layer_index];
                     if (stack) {
                         this.ExpressAPP._router.stack[layer_index].handle = routescript;
                         this.AppendLog('info', 'Replace Route Stack \'' + route + '\'');
                     } else {
+                        this.SetExpressErrorHandler();
                         this.ExpressAPP.use(route, routescript);
-                        this.ExpressAPP._router.layer_map[route] = (this.ExpressAPP._router.stack.length-1);
-                        this.AppendLog('info', 'Add Route Stack \'' + route + '\'');
+                        this.ExpressAPP._router.layer_map["route:" + route] = (this.ExpressAPP._router.stack.length - 1);
+                        this.AppendLog('info', 'Add Route Stack \'' + route + '\'');   
+                        this.SetExpressErrorHandler();
                     }
                 }
             }
         }
     }
     this.__proto__.SetExpressErrorHandler = function(){
-        if (this.ExpressAPP._router.error_handler_layer_map.length == 0) {
-            this.ExpressAPP.use(function(req, res, next) {
+        var notfound_stack_id = this.ExpressAPP._router.layer_map["errhandler:NotFoundErrorHandler"];
+        var servererror_stack_id = this.ExpressAPP._router.layer_map["errhandler:ServerErrorHandler"];
+        if (notfound_stack_id === undefined) {
+            function NotFoundErrorHandler (req, res, next) {
                 var err = new Error('Not Found');
                 err.status = 404;
                 next(err);
-            });
-            this.ExpressAPP._router.error_handler_layer_map.push(this.ExpressAPP._router.stack.length - 1);
-
-            if (this.ExpressAPP.get('env') === 'development') {
-                this.ExpressAPP.use(function(err, req, res, next) {
-                    res.status(err.status || 500);
-                    res.render('error', {
-                        message: err.message,
-                        error: err
-                    });
-                });
-                this.ExpressAPP._router.error_handler_layer_map.push(this.ExpressAPP._router.stack.length - 1);
             }
-
-            this.ExpressAPP.use(function(err, req, res, next) {
+            this.ExpressAPP.use(NotFoundErrorHandler);
+            this.ExpressAPP._router.layer_map["errhandler:NotFoundErrorHandler"] = this.ExpressAPP._router.stack.length - 1;
+        } else {
+            this.ExpressAPP._router.stack.splice(notfound_stack_id, 1);
+            delete this.ExpressAPP._router.layer_map["errhandler:NotFoundErrorHandler"];
+        }
+        if (servererror_stack_id === undefined) {
+            function ServerErrorHandler (err, req, res, next) {
                 res.status(err.status || 500);
                 res.render('error', {
                     message: err.message,
-                    error: {}
+                    error: err
                 });
-            });
-            this.ExpressAPP._router.error_handler_layer_map.push(this.ExpressAPP._router.stack.length - 1);
-        } else {
-            var current_length = this.ExpressAPP._router.stack.length;
-            var error_map = this.ExpressAPP._router.error_handler_layer_map;
-            var error_handlers = this.ExpressAPP._router.stack.splice(error_map[0], error_map.length);
-            this.ExpressAPP._router.error_handler_layer_map = [];
-            for (var i in error_handlers) {
-                this.ExpressAPP._router.stack.push(error_handlers[i]);
-                this.ExpressAPP._router.error_handler_layer_map.push(this.ExpressAPP._router.stack.length - 1);
             }
+            this.ExpressAPP.use(ServerErrorHandler);
+            this.ExpressAPP._router.layer_map["errhandler:ServerErrorHandler"] = this.ExpressAPP._router.stack.length - 1;
+        } else {
+            this.ExpressAPP._router.stack.splice(notfound_stack_id, 1);
+            delete this.ExpressAPP._router.layer_map["errhandler:ServerErrorHandler"];
         }
-        
     }
     this.__proto__.KillExpress = function(){
         if (this.ExpressAPP !== undefined) {
