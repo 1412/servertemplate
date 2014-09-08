@@ -6,8 +6,17 @@ define(PROGRAM_PATH, function( ){ return require('path').dirname(require.main.fi
             "enable": true
         },
         "telnet": {
-            "enable": false,
+            "enable": true,
             "port": 3001
+        }
+    },
+    "switches": {
+        "resetstate": {
+            "commands": [
+                "-r",
+                "--reset"
+            ],
+            "needvalue": false
         }
     },
 	"db": {
