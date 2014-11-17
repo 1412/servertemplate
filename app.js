@@ -4,10 +4,9 @@ var node_modules_path = './node_modules/',
     events = require('events'),
     domain = require('domain'),
     path = require('path'),
-    os = require('os'),
     net = require('net'),
-    child_process = require('child_process'),
     
+    _ = require(node_modules_path + 'underscore'),
     MarshalJSON = require(node_modules_path + 'marshaljson'),
     configreader = require(node_modules_path + 'config-reader'),
     wget = require(node_modules_path + 'jswget'),
@@ -82,64 +81,42 @@ var Application = function () {
             }            
         }
         this.REPL = new REPL(this);
-        
-        // Define command for REPL here
-        this['this'] = function() {
-            return this;
-        }
-        this['self'] = function() {
-            return this;
-        }
-        this['global'] = function() {
-            return global;
-        }
-        this['uptime'] = function() {
-            return 'Application has been run for: ' + os.uptime() + ' second(s)';
-        }
-        this['suicide'] = function() {
-            this.Express.suicide();
-            this.REPL.suicide();
-        }
-        this['restart'] = function() {
-            this.suicide();
-            child_process.fork(__filename);
-            process.exit(0);
-        }
-        this['help'] = function(args, argtext){
-            this.Log.info('Print Help');
-        }
-        this['eval'] = function(args, argtext){
-            eval(argtext)
-        }
+        _.extend(this, this.REPL._context);
     }
     this.__proto__.InitDB = function(){
-        var DB = require(path.join(__dirname, 'db'));
-        this.DB = new DB(this.CONFIG);
-        this.DB.Log = new LOGGER(this, "DB");
-        this.DB.init({
-            onbegin: function(){
-                this.DB.Log.info('Connecting...');
-            },
-            onconnected: function(){
-                this.DB.Log.info('Connected');
-            },
-            onbegindata: function(){
-                this.DB.Log.info('Insert initial data...');
-            },
-            onenddata: function(worker){
-                this.DB.Log.info('Finish insert initial data...', ((worker.error.length > 0)? ' with errors:\n':''), ((worker.error.length > 0)? worker.error:''));
-            },
-            onfaildata: function(worker){
-                this.DB.Log.info('Failed to insert initial data with errors:'+'\n' + worker.error);
-            },
-            onsuccess: function(){
-                this.DB.Log.info('Finish synch');
-            },
-            onerror: function(e){
-                this.DB.Log.error('Error initializing: ', e.stack);
-            },
-            scope: this
-        })
+        switch (this.CONFIG.db.enggine) {
+            case "mysql": {
+                var DB = require(path.join(__dirname, 'db'));
+                this.DB = new DB(this.CONFIG);
+                this.DB.Log = new LOGGER(this, "DB");
+                this.DB.init({
+                    onbegin: function(){
+                        this.DB.Log.info('Connecting...');
+                    },
+                    onconnected: function(){
+                        this.DB.Log.info('Connected');
+                    },
+                    onbegindata: function(){
+                        this.DB.Log.info('Insert initial data...');
+                    },
+                    onenddata: function(worker){
+                        this.DB.Log.info('Finish insert initial data...', ((worker.error.length > 0)? ' with errors:\n':''), ((worker.error.length > 0)? worker.error:''));
+                    },
+                    onfaildata: function(worker){
+                        this.DB.Log.info('Failed to insert initial data with errors:'+'\n' + worker.error);
+                    },
+                    onsuccess: function(){
+                        this.DB.Log.info('Finish synch');
+                    },
+                    onerror: function(e){
+                        this.DB.Log.error('Error initializing: ', e);
+                    },
+                    scope: this
+                })
+            } break;
+            default: {
+            } break;
+        };        
     }
     this.__proto__.InitExpress = function(callback){
         if (this.Express !== undefined) {

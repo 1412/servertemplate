@@ -13,9 +13,9 @@
     "ejs": "~1.0.0",
     "consolidate": "~0.10.0",
     "express-ejs-layouts": "~1.1.0",
-    "sequelize": "~2.0.0-alpha2",
+    "sequelize": "~2.0.0-rc2",
     "mysql": "~2.3.2",
-    "config-reader": "~0.1.0",
+    "config-reader": "~0.1.1",
     "marshaljson": "~0.1.0",
     "nodemailer": "~0.4.4",
     "cookie-parser": "~1.0.1",
@@ -32,7 +32,9 @@
     "connect-timeout": "~1.1.1",
     "jswget": "~0.3.4",
     "chokidar": "~0.8.4",
-    "log4js": "~0.6.21"
+    "log4js": "~0.6.21",
+    "semver": "~4.1.0",
+    "underscore": "~1.7.0"
   },
   "main": "index.js",
   "author": "",

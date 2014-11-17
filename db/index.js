@@ -4,11 +4,20 @@ var DB = function(config){
 	this.__proto__.schema = require('./schema.js');
 	this.__proto__.task = require('./initial.js');
 	this.__proto__.preinit = function() {
-		/* Modify Task Config */
-		this.task.splice(this.task.indexOf("%"), 1, {
-			ref: "application_info",
+		/* Modify Task Config */        
+        this.__proto__.schema._app_ = {
+            name: SEQUELIZE.STRING(100),
+            version: SEQUELIZE.STRING(10),
+            schemaVersion: SEQUELIZE.STRING(10),
+            owner: SEQUELIZE.STRING(100),
+            address: SEQUELIZE.STRING,
+            note: SEQUELIZE.STRING(100),
+            __proto__: { freezeTableName: true }
+        } 
+        this.task.unshift({
+			ref: "_app_init_",
 			task: "create",
-			table: "ApplicationInfo",
+			table: "_app_",
 			continueOnError: false,
 			data: {
 				name: this.config.application.name,
@@ -17,19 +26,8 @@ var DB = function(config){
 				owner: this.config.application.owner,
 				address: this.config.application.address
 			}
-		});
-		this.task.splice(this.task.indexOf("&"), 1, {
-			ref: "admin_user",
-			task: "build",
-			table: "User",
-			data: {
-				username: this.config.application.admin_username,
-				password: require('crypto').createHash('md5').update(this.config.application.admin_password).digest('hex'),
-				enabled: true,
-				email: this.config.application.admin_email
-			}
-		});
-	}	
+		});        
+	}
 	/* Do Not Modify Anything Bellow Here */
 	
 	this.__version = this.schema.__version;
@@ -99,7 +97,7 @@ var DB = function(config){
 				delete table.__proto__;
 				this[key] = this.schema[key] = this.Client.define(key, table, option);		 
 			}
-			for (i in relation_config) {
+			for (var i in relation_config) {
 				var relation = relation_config[i];
 				var o = relation.options;
 				var a = this.schema[relation.from];
@@ -123,7 +121,7 @@ var DB = function(config){
 			this.Client.sync().success(function() {
                 options.onconnected.apply(options.scope, []);
 				this.task_object = {};
-				this.schema["ApplicationInfo"].count().success(function(c) {
+				this.schema["_app_"].count().success(function(c) {
 					if (c == 0) {
                         options.onbegindata.apply(options.scope, []);
 						this.taskreference = {};
