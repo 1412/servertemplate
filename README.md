@@ -2,8 +2,8 @@ Node-Server-1412
 ===========
 [![NPM](https://nodei.co/npm/jswget.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-server-1412/)<br/>
 [![NPM version](https://badge.fury.io/js/node-server-1412.png)](http://badge.fury.io/js/node-server-1412)
-[![Stories in Ready](https://badge.waffle.io/1412/node-server-1412.png?label=ready)](http://waffle.io/1412/node-server-1412)
-[![build status](https://secure.travis-ci.org/1412/node-server-1412.png)](http://travis-ci.org/1412/node-server-1412)
+[![Stories in Ready](https://badge.waffle.io/1412/servertemplate.png?label=ready)](http://waffle.io/1412/servertemplate)
+[![build status](https://secure.travis-ci.org/1412/servertemplate.png)](http://travis-ci.org/1412/servertemplate)
 
 ## Introduction
 
