@@ -29,6 +29,7 @@ define(PROGRAM_PATH, function( ){ return require('path').dirname(require.main.fi
 		"database": "test_server"
 	},
 	"site": {
+        "enable": false,
 		"title": "D'Smile Klinik",
 		"powered-by": "1412 @ NodeJS Express",
 		"session_secret": "dsmileklinik",
@@ -36,6 +37,45 @@ define(PROGRAM_PATH, function( ){ return require('path').dirname(require.main.fi
 		"listen_port": 3000,
         "timeout": 30000
 	},
+    "mailer": {
+        "transports": [{
+            "name": "GMail",
+            "listening": false,
+            "type": "SMTP",
+            "service": "Gmail",
+            "host": "smtp.gmail.com",
+            "secureConnection": true,
+            "port": 465,
+            "username": "itp.sms1@gmail.com",
+            "password": "deckyfx1"
+        }],
+        "sender": "\"ITProvent Locatr PNS Service\" <dev@itprovent.com>",
+        "recipients": {
+            "Technical": [
+                "\"Decky Fx\" <decky@itprovent.com>",
+                "\"Christian Losari\" <closari@itprovent.com>",
+                "\"Eddy Hartanto\" <ehartanto@itprovent.com>",
+                "\"Mario\" <mario@itprovent.com>",
+                "\"Adi Yustiawan\" <adi@itprovent.com>",
+                "\"Yudha\" <yuda@itprovent.com>",
+                "\"Ahmad\" <ahmad@itprovent.com>",
+                "\"Harry\" <harry@itprovent.com>"
+            ],
+            "Customer Service": [
+                "\"Decky Fx\" <decky@itprovent.com>",
+                "\"Christian Losari\" <closari@itprovent.com>",
+                "\"Eddy Hartanto\" <ehartanto@itprovent.com>",
+                "\"Mario\" <mario@itprovent.com>",
+                "\"Adi Yustiawan\" <adi@itprovent.com>",
+                "\"Yudha\" <yuda@itprovent.com>",
+                "\"Ahmad\" <ahmad@itprovent.com>",
+                "\"Harry\" <harry@itprovent.com>",
+                "\"Ari\" <ari@itprovent.com>",
+                "\"Fanny\" <fanny@itprovent.com>",
+                "\"Rudy\" <rudy@itprovent.com>"
+            ]
+        }
+    },
 	"application": {
 		"name": "Aplikasi Klinik D'Smile",
 		"owner": "Tintus Ardi",

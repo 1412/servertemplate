@@ -4,16 +4,15 @@ var node_modules_path = './node_modules/',
     events = require('events'),
     domain = require('domain'),
     path = require('path'),
-    net = require('net'),
     
     _ = require(node_modules_path + 'underscore'),
     MarshalJSON = require(node_modules_path + 'marshaljson'),
     configreader = require(node_modules_path + 'config-reader'),
-    wget = require(node_modules_path + 'jswget'),
     nodemailer = require(node_modules_path + 'nodemailer'),    
     
     LOGGER = require('./lib/logger.js'),
     REPL = require('./lib/repl.js'),
+    MAILER = require('./lib/mailer.js'),
     EXPRESS = require('./lib/express.js');
 var Main;
 
@@ -70,8 +69,7 @@ var Application = function () {
         var State = {};
         try {
             State = MarshalJSON.deserialize(fs.readFileSync(path.join(__dirname, 'state')));
-        } catch (e) {}        
-        //(State.OUTBOXINDEX !== undefined) ? (this.OUTBOXINDEX = State.OUTBOXINDEX) : void(0);        
+        } catch (e) {}
         this.Log.info('>> State: loaded!');
     },
     this.__proto__.InitREPL = function(){
@@ -83,8 +81,13 @@ var Application = function () {
         this.REPL = new REPL(this);
         _.extend(this, this.REPL._context);
     }
+    this.__proto__.InitMAILER = function(){
+        this.MAILER = new MAILER(this);
+    }
     this.__proto__.InitDB = function(){
         switch (this.CONFIG.db.enggine) {
+            case "mssql": 
+            case "postgresql": 
             case "mysql": {
                 var DB = require(path.join(__dirname, 'db'));
                 this.DB = new DB(this.CONFIG);
@@ -119,12 +122,15 @@ var Application = function () {
         };        
     }
     this.__proto__.InitExpress = function(callback){
-        if (this.Express !== undefined) {
-            if (this.Express.suicide !== undefined) {
-                this.Express.suicide();
-            }            
+        var enable = (this.CONFIG.site.enable === undefined)? true:(this.CONFIG.site.enable == true);
+        if (enable) {
+            if (this.Express !== undefined) {
+                if (this.Express.suicide !== undefined) {
+                    this.Express.suicide();
+                }            
+            }
+            this.Express = new EXPRESS(this);
         }
-        this.Express = new EXPRESS(this);
     }
     this.__proto__.ParseCommandSwitches = function () {
         this.SWITCHARGV = {};
@@ -160,6 +166,7 @@ var Application = function () {
                 this.ClearState();
             } break;
             default: {
+                this.InitMAILER();
                 this.InitREPL();
                 this.InitDB();
                 this.InitExpress();
