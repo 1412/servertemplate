@@ -1,7 +1,7 @@
 {
-  "name": "ServerFramework",
-  "version": "0.1.0",
-  "private": true,
+  "name": "node-server-1412",
+  "version": "0.1.5a",
+  "private": false,
   "scripts": {
     "start": "node index.js"
   },
@@ -37,6 +37,19 @@
     "underscore": "~1.7.0"
   },
   "main": "index.js",
-  "author": "",
-  "license": "MIT"
+  "author": "Decky Fiyemonda",
+  "license": "BSD-2-Clause",
+  "description": "ServerFramework ============== <pre> [![NPM](https://nodei.co/npm/jswget.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/jswget/)<br/> [![NPM version](https://badge.fury.io/js/jswget.png)](http://badge.fury.io/js/jswget) [![Stories in Ready](https://badge.waffle.io/1412/jswget.png?label=ready)](http://waffle.io/1412/jswget) [![build status](https://secure.travis-ci.org/1412/jswget.png)](http://travis-ci.org/1412/jswget) </pre> ## Installing",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1412/servertemplate.git"
+  },
+  "keywords": [
+    "server",
+    "template"
+  ],
+  "bugs": {
+    "url": "https://github.com/1412/servertemplate/issues"
+  }
 }
