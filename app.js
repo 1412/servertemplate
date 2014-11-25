@@ -47,6 +47,7 @@ function SaveState() {
 var Application = function () {
     /* Do Not Modify This Part */
     this.CONFIG = (new configreader()).parseSync(path.join(__dirname, 'config.json'));
+    this.app_script = __filename;
     this.__proto__.InitLoger = function () {
         this.Log = new LOGGER(this);
     }
@@ -79,7 +80,9 @@ var Application = function () {
             }            
         }
         this.REPL = new REPL(this);
-        _.extend(this, this.REPL._context);
+        this.REPL.onchange = function(){
+            _.extend(this, this.REPL._context);
+        }.bind(this)        
     }
     this.__proto__.InitMAILER = function(){
         this.MAILER = new MAILER(this);
@@ -90,23 +93,13 @@ var Application = function () {
             case "postgresql": 
             case "mysql": {
                 var DB = require(path.join(__dirname, 'db'));
-                this.DB = new DB(this.CONFIG);
-                this.DB.Log = new LOGGER(this, "DB");
+                this.DB = new DB(this);
                 this.DB.init({
                     onbegin: function(){
                         this.DB.Log.info('Connecting...');
                     },
                     onconnected: function(){
                         this.DB.Log.info('Connected');
-                    },
-                    onbegindata: function(){
-                        this.DB.Log.info('Insert initial data...');
-                    },
-                    onenddata: function(worker){
-                        this.DB.Log.info('Finish insert initial data...', ((worker.error.length > 0)? ' with errors:\n':''), ((worker.error.length > 0)? worker.error:''));
-                    },
-                    onfaildata: function(worker){
-                        this.DB.Log.info('Failed to insert initial data with errors:'+'\n' + worker.error);
                     },
                     onsuccess: function(){
                         this.DB.Log.info('Finish synch');
