@@ -193,6 +193,10 @@ var DB = function(context){
                     if (taskreference) {
                         if (taskreference.dbRev !== undefined) {
                             var ordertexts = fs.readFileSync(this.basepath + '/sqls/order').toString();
+                            if (ordertexts.length == 0) {
+                                this.taskdone(task, {});
+                                return;
+                            }
                             var orders = ordertexts.split("\n");
                             var order_file = orders[taskreference.dbRev];
                             if (order_file !== undefined) {
